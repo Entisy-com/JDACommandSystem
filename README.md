@@ -17,20 +17,23 @@ public class Bot extends ListenerAdapter {
     }
     
     private static void setupCommands() {
-        CommandManager.get().addCommand("test", (args1, message, chat, author) -> chat.sendMessage("lol").complete() != null);
-        SlashCommandManager.get().addCommand("test", (command, chat, author) -> chat.sendMessage("lol").complete() != null);
-        // ...
+        CommandManager.get().addCommand("test", new TestCommand());
+        SlashCommandManager.get().addCommand("test", new TestSlashCommand());
     }
-    
-    // Commands
+
+    @Override
+    public void onGuildReady(GuildReadyEvent event) {
+        event.getGuild().updateCommands().addCommands(
+                Commands.slash("test", "this is a test")
+        ).queue();
+    }
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        // prefix logic...
         var args = event.getMessage().getContentRaw().trim().split(" ");
         CommandManager.get().execute(args[0], event.getMessage(), event.getChannel().asTextChannel(), event.getMember());
     }
-    
-    // Slash Commands
+
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         SlashCommandManager.get().execute(event.getName(), event);
